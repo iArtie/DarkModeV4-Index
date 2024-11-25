@@ -19,7 +19,7 @@ jobs:
           ISSUE_AUTHOR=${{ github.event.issue.user.login }}
           
           # Comprobar si el autor es iArtie o GhostPower13
-          if [[ "$ISSUE_AUTHOR" != "iArtie" ]]; then
+          if [[ "$ISSUE_AUTHOR" != "iArtie" && "$ISSUE_AUTHOR" != "GhostPower13" ]]; then
             echo "Error: $ISSUE_AUTHOR is not authorized to trigger this action."
             exit 1
           fi
