@@ -1,31 +1,25 @@
-name: Update texturepacks.json
+name: Update Texture Packs JSON
 
 on:
   issues:
-    types:
-      - opened
+    types: [opened]
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
-
     steps:
-      # Check out the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Parse issue and validate inputs
-      - name: Validate and Update texturepacks.json
+      - name: Extract issue parameters and update JSON
         env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Obtener el cuerpo de la issue
-          ISSUE_BODY="${{ github.event.issue.body }}"
-          
-          # Extraer parámetros usando expresiones regulares
-          TYPE=$(echo "$ISSUE_BODY" | grep -oP '(?<=TexturePack Type: )[^\n]+')
-          VERSION=$(echo "$ISSUE_BODY" | grep -oP '(?<=Version: )[^\n]+')
-          DOWNLOAD=$(echo "$ISSUE_BODY" | grep -oP '(?<=Download: )[^\n]+')
+          # Extraer parámetros del cuerpo de la issue
+          TYPE=$(echo "$ISSUE_BODY" | sed -n '/### TexturePack Type/,/###/p' | tail -n +2 | head -n 1 | xargs)
+          VERSION=$(echo "$ISSUE_BODY" | sed -n '/### Version/,/###/p' | tail -n +2 | head -n 1 | xargs)
+          DOWNLOAD=$(echo "$ISSUE_BODY" | sed -n '/### Download Link/,/###/p' | tail -n +2 | head -n 1 | xargs)
 
           # Validar formato de la versión
           if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -43,12 +37,13 @@ jobs:
           JSON_FILE="texturepacks.json"
           UPDATED_JSON=$(jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" \
             '.[$type][$version] = { download: $download }' "$JSON_FILE")
-          
+
           # Sobreescribir el archivo
           echo "$UPDATED_JSON" > "$JSON_FILE"
 
-      # Commit changes
-      - name: Commit and Push Changes
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
