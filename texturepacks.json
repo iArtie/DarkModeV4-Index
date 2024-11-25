@@ -1,5 +1,9 @@
 {
-  "METAL": {},
+  "METAL": {
+    "1.0.0": {
+      "download": "https://test.com/holasosas"
+    }
+  },
   "BLOOD": {},
   "EARTH": {},
   "FIRE": {},
