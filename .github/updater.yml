@@ -1,0 +1,57 @@
+name: Update texturepacks.json
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Parse issue and validate inputs
+      - name: Validate and Update texturepacks.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Obtener el cuerpo de la issue
+          ISSUE_BODY="${{ github.event.issue.body }}"
+          
+          # Extraer parámetros usando expresiones regulares
+          TYPE=$(echo "$ISSUE_BODY" | grep -oP '(?<=TexturePack Type: )[^\n]+')
+          VERSION=$(echo "$ISSUE_BODY" | grep -oP '(?<=Version: )[^\n]+')
+          DOWNLOAD=$(echo "$ISSUE_BODY" | grep -oP '(?<=Download: )[^\n]+')
+
+          # Validar formato de la versión
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Invalid version format. Must match X.Y.Z (e.g., 1.0.0)."
+            exit 1
+          fi
+
+          # Validar enlace de descarga
+          if ! [[ "$DOWNLOAD" =~ ^https?:// ]]; then
+            echo "Error: Invalid download link. Must be a valid URL."
+            exit 1
+          fi
+
+          # Leer y actualizar el archivo JSON
+          JSON_FILE="texturepacks.json"
+          UPDATED_JSON=$(jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" \
+            '.[$type][$version] = { download: $download }' "$JSON_FILE")
+          
+          # Sobreescribir el archivo
+          echo "$UPDATED_JSON" > "$JSON_FILE"
+
+      # Commit changes
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add texturepacks.json
+          git commit -m "Update texturepacks.json from issue #${{ github.event.issue.number }}"
+          git push
