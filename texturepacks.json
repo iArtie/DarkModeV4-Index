@@ -1,6 +1,14 @@
 {
-  "METAL": {},
-  "BLOOD": {},
+  "METAL": {
+    "1.0.0": {
+      "download": "https://test.com/holasosas"
+    }
+  },
+  "BLOOD": {
+    "1.0.0": {
+      "download": "https://test.com/holasosas"
+    }
+  },
   "EARTH": {},
   "FIRE": {},
   "ICE": {},
