@@ -52,3 +52,13 @@ jobs:
           git add texturepacks.json
           git commit -m "Update texturepacks.json from issue #${{ github.event.issue.number }}"
           git push
+
+      - name: Close the issue after successful update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          curl -X PATCH \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -d '{"state": "closed"}' \
+            "https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER"
