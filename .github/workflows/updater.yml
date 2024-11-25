@@ -11,22 +11,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Check if the user is a contributor
+      - name: Check if the user is iArtie or GhostPower13
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Obtener el nombre de usuario del creador de la issue
           ISSUE_AUTHOR=${{ github.event.issue.user.login }}
-          REPO_OWNER=${{ github.repository_owner }}
           
-          # Comprobar si el autor de la issue ha realizado contribuciones al repositorio
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/$REPO_OWNER/${{ github.repository }}/commits?author=$ISSUE_AUTHOR")
-
-          # Si la respuesta es 200, significa que ha realizado commits y es un contributor
-          if [ "$response" != "200" ]; then
-            echo "Error: $ISSUE_AUTHOR is not a contributor of the repository."
+          # Comprobar si el autor es iArtie o GhostPower13
+          if [[ "$ISSUE_AUTHOR" != "iArtie" ]]; then
+            echo "Error: $ISSUE_AUTHOR is not authorized to trigger this action."
             exit 1
           fi
 
