@@ -19,10 +19,10 @@ jobs:
           # Imprimir el contenido de la issue para depurar
           echo "ISSUE BODY: $ISSUE_BODY"
 
-          # Extraer parámetros del cuerpo de la issue
-          TYPE=$(echo "$ISSUE_BODY" | sed -n '/### TexturePack Type/,/###/p' | tail -n +2 | head -n 1 | xargs)
-          VERSION=$(echo "$ISSUE_BODY" | sed -n '/### Version/,/###/p' | tail -n +2 | head -n 1 | xargs)
-          DOWNLOAD=$(echo "$ISSUE_BODY" | sed -n '/### Download Link/,/###/p' | tail -n +2 | head -n 1 | xargs)
+          # Extraer parámetros del cuerpo de la issue, usando líneas específicas
+          TYPE=$(echo "$ISSUE_BODY" | sed -n '2p' | xargs)  # La línea 2 después de "### TexturePack Type"
+          VERSION=$(echo "$ISSUE_BODY" | sed -n '4p' | xargs)  # La línea 4 después de "### Version"
+          DOWNLOAD=$(echo "$ISSUE_BODY" | sed -n '6p' | xargs)  # La línea 6 después de "### Download Link"
 
           # Imprimir los valores extraídos para depurar
           echo "TYPE: $TYPE"
