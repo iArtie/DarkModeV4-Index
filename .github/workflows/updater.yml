@@ -21,6 +21,12 @@ jobs:
           VERSION=$(echo "$ISSUE_BODY" | sed -n '/### Version/,/###/p' | tail -n +2 | head -n 1 | xargs)
           DOWNLOAD=$(echo "$ISSUE_BODY" | sed -n '/### Download Link/,/###/p' | tail -n +2 | head -n 1 | xargs)
 
+          # Comprobar si los valores están vacíos
+          if [[ -z "$TYPE" || -z "$VERSION" || -z "$DOWNLOAD" ]]; then
+            echo "Error: Missing parameters. Type, Version, and Download are required."
+            exit 1
+          fi
+
           # Leer y actualizar el archivo JSON
           JSON_FILE="texturepacks.json"
           UPDATED_JSON=$(jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" \
