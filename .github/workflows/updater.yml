@@ -11,6 +11,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Check if the user is a collaborator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Obtener el nombre de usuario del creador de la issue
+          ISSUE_AUTHOR=${{ github.event.issue.user.login }}
+          REPO_OWNER=${{ github.repository_owner }}
+
+          # Comprobar si el autor de la issue es colaborador
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$REPO_OWNER/${{ github.repository }}/collaborators/$ISSUE_AUTHOR")
+
+          if [ "$response" != "204" ]; then
+            echo "Error: $ISSUE_AUTHOR is not a collaborator of the repository."
+            exit 1
+          fi
+
       - name: Extract issue parameters and update JSON
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
