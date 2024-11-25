@@ -16,10 +16,18 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Imprimir el contenido de la issue para depurar
+          echo "ISSUE BODY: $ISSUE_BODY"
+
           # Extraer parámetros del cuerpo de la issue
           TYPE=$(echo "$ISSUE_BODY" | sed -n '/### TexturePack Type/,/###/p' | tail -n +2 | head -n 1 | xargs)
           VERSION=$(echo "$ISSUE_BODY" | sed -n '/### Version/,/###/p' | tail -n +2 | head -n 1 | xargs)
           DOWNLOAD=$(echo "$ISSUE_BODY" | sed -n '/### Download Link/,/###/p' | tail -n +2 | head -n 1 | xargs)
+
+          # Imprimir los valores extraídos para depurar
+          echo "TYPE: $TYPE"
+          echo "VERSION: $VERSION"
+          echo "DOWNLOAD: $DOWNLOAD"
 
           # Comprobar si los valores están vacíos
           if [[ -z "$TYPE" || -z "$VERSION" || -z "$DOWNLOAD" ]]; then
