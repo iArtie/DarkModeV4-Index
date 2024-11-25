@@ -1,0 +1,38 @@
+name: "Add TexturePack"
+description: "Submit a new texture pack version."
+title: "[TexturePack] Add new version"
+labels: ["TexturePack"]
+body:
+  - type: dropdown
+    id: texturepack_type
+    attributes:
+      label: "TexturePack Type"
+      options:
+        - METAL
+        - BLOOD
+        - EARTH
+        - FIRE
+        - ICE
+        - LAVA
+        - LIGHT
+        - MOON
+        - POISON
+        - SHADOW
+        - SOUL
+        - STAR
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: "Version (e.g., 1.0.0)"
+      placeholder: "Enter version number"
+    validations:
+      required: true
+  - type: input
+    id: download
+    attributes:
+      label: "Download Link"
+      placeholder: "Enter download URL"
+    validations:
+      required: true
