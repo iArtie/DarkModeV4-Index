@@ -48,12 +48,20 @@ jobs:
             exit 1
           fi
 
-          # Leer y actualizar el archivo JSON
+          # Leer el archivo JSON existente
           JSON_FILE="texturepacks.json"
-          UPDATED_JSON=$(jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" \
-            '.[$type][$version] = { download: $download }' "$JSON_FILE")
+          JSON_CONTENT=$(cat "$JSON_FILE")
 
-          # Sobreescribir el archivo
+          # Asegurarse de que el tipo exista, si no, lo creamos
+          if ! echo "$JSON_CONTENT" | jq -e ".\"$TYPE\"" > /dev/null; then
+            JSON_CONTENT=$(echo "$JSON_CONTENT" | jq --arg type "$TYPE" '. + {($type): {}}')
+          fi
+
+          # Actualizar la versión "Lastest" con el enlace de descarga proporcionado
+          UPDATED_JSON=$(echo "$JSON_CONTENT" | jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" '
+            .[$type]["Lastest"] = { "download": $download }')
+
+          # Sobreescribir el archivo con los cambios
           echo "$UPDATED_JSON" > "$JSON_FILE"
 
       - name: Commit and push changes

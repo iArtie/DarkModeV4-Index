@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\.github",
+    "\\.github\\workflows"
   ],
-  "SelectedNode": "\\C:\\Users\\indir\\Source\\Repos\\DarkModeV4-Index",
+  "SelectedNode": "\\texturepacks.json",
   "PreviewInSolutionExplorer": false
 }
