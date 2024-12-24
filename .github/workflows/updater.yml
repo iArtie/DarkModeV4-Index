@@ -65,17 +65,13 @@ jobs:
           UPDATED_JSON=$(echo "$UPDATED_JSON" | jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" '
             .[$type]["Lastest"] = { "download": $download }')
 
-          # Mover la clave "Lastest" al final de las versiones
-          UPDATED_JSON=$(echo "$UPDATED_JSON" | jq '
-            .["METAL"] |= 
-              with_entries(
-                if .key == "Lastest" then
-                  . 
-                else 
-                  { .key, .value }
-                end
-              ) | 
-            .[$type]["Lastest"] |= { "download": $download }
+          # Reordenar las claves para asegurar que Lastest siempre esté al final
+          UPDATED_JSON=$(echo "$UPDATED_JSON" | jq --arg type "$TYPE" '
+            .[$type] |= 
+              to_entries | 
+              sort_by(.key | select(. != "Lastest")) | 
+              . + [{ "key": "Lastest", "value": .["Lastest"] }] | 
+              from_entries
           ')
 
           # Sobreescribir el archivo con los cambios
