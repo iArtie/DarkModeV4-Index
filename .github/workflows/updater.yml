@@ -68,10 +68,12 @@ jobs:
           # Reordenar las claves para asegurar que Lastest siempre esté al final
           UPDATED_JSON=$(echo "$UPDATED_JSON" | jq --arg type "$TYPE" '
             .[$type] |= 
-              to_entries | 
-              sort_by(.key | select(. != "Lastest")) | 
-              . + [{ "key": "Lastest", "value": .["Lastest"] }] | 
-              from_entries
+              if has("Lastest") then
+                # Extraemos "Lastest" y lo removemos del objeto
+                (del(.["Lastest"]) | .) + { "Lastest": .["Lastest"] }
+              else
+                .
+              end
           ')
 
           # Sobreescribir el archivo con los cambios
