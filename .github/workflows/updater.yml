@@ -61,16 +61,16 @@ jobs:
           UPDATED_JSON=$(echo "$JSON_CONTENT" | jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" '
             .[$type][$version] = { "download": $download }')
 
-          # Actualizar la versión Lastest con la misma URL de descarga
+          # Actualizar la versión Lastest con la nueva información
           UPDATED_JSON=$(echo "$UPDATED_JSON" | jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" '
-            .[$type]["Lastest"] = { "download": $download }')
+            .[$type]["Lastest"] = { "version": $version, "download": $download }')
 
-          # Reordenar las claves para asegurar que Lastest siempre esté al final
+          # Reordenar las claves para asegurar que Lastest esté primero
           UPDATED_JSON=$(echo "$UPDATED_JSON" | jq --arg type "$TYPE" '
             .[$type] |= 
+              # Extraemos "Lastest" y lo removemos del objeto
               if has("Lastest") then
-                # Extraemos "Lastest" y lo removemos del objeto
-                (del(.["Lastest"]) | .) + { "Lastest": .["Lastest"] }
+                { "Lastest": .["Lastest"] } + (del(.["Lastest"])) 
               else
                 .
               end
