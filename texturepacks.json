@@ -1,28 +1,14 @@
 {
-  "METAL": {
-    "1.0.0": {
-      "download": "https://laweapruebaxdxd.com"
-    },
-    "1.0.1": {
-      "download": "https://ultimolinksxd.com"
-    }
-  },
-  "BLOOD": {
-    "1.0.0": {
-      "download": "https://lasadafaf.com"
-    },
-    "v1.0.1": {
-      "download": "adffsasafasfsaf"
-    }
-  },
-  "EARTH": {},
-  "FIRE": {},
-  "ICE": {},
-  "LAVA": {},
-  "LIGHT": {},
-  "MOON": {},
-  "POISON": {},
-  "SHADOW": {},
-  "SOUL": {},
-  "STAR": {}
+  "METAL":[],
+  "BLOOD": [],
+  "EARTH": [],
+  "FIRE": [],
+  "ICE": [],
+  "LAVA": [],
+  "LIGHT": [],
+  "MOON": [],
+  "POISON": [],
+  "SHADOW": [],
+  "SOUL": [],
+  "STAR": []
 }
