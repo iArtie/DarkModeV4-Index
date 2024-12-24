@@ -1,11 +1,14 @@
 {
   "METAL": {
     "Lastest": {
-      "version": "1.0.0",
-      "download": "https://test.com/holasosas"
+      "version": "1.0.1",
+      "download": "awaedasfsfasf"
     },
     "1.0.0": {
       "download": "https://test.com/holasosas"
+    },
+    "1.0.1": {
+      "download": "awaedasfsfasf"
     }
   },
   "BLOOD": {},
