@@ -26,7 +26,15 @@
       "download": "awafsafssf"
     }
   },
-  "EARTH": {},
+  "EARTH": {
+    "Lastest": {
+      "version": "1.0.0",
+      "download": "afsfasfasfas"
+    },
+    "1.0.0": {
+      "download": "afsfasfasfas"
+    }
+  },
   "FIRE": {},
   "ICE": {},
   "LAVA": {},
