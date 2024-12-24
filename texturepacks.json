@@ -1,5 +1,13 @@
 {
-  "METAL": {},
+  "METAL": {
+    "Lastest": {
+      "version": "1.0.0",
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.0-METAL/METAL.zip"
+    },
+    "1.0.0": {
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.0-METAL/METAL.zip"
+    }
+  },
   "BLOOD": {},
   "EARTH": {},
   "FIRE": {},
