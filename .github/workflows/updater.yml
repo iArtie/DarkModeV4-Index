@@ -57,8 +57,12 @@ jobs:
             JSON_CONTENT=$(echo "$JSON_CONTENT" | jq --arg type "$TYPE" '. + {($type): {}}')
           fi
 
-          # Actualizar la versión "Lastest" con el enlace de descarga proporcionado
+          # Agregar la nueva versión al tipo especificado
           UPDATED_JSON=$(echo "$JSON_CONTENT" | jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" '
+            .[$type][$version] = { "download": $download }')
+
+          # Actualizar la versión Lastest con la misma URL de descarga
+          UPDATED_JSON=$(echo "$UPDATED_JSON" | jq --arg type "$TYPE" --arg version "$VERSION" --arg download "$DOWNLOAD" '
             .[$type]["Lastest"] = { "download": $download }')
 
           # Sobreescribir el archivo con los cambios
