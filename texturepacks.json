@@ -35,7 +35,15 @@
       "download": "afsfasfasfas"
     }
   },
-  "FIRE": {},
+  "FIRE": {
+    "Lastest": {
+      "version": "1.0.0",
+      "download": "safasfasfsagfgassaggas"
+    },
+    "1.0.0": {
+      "download": "safasfasfsagfgassaggas"
+    }
+  },
   "ICE": {},
   "LAVA": {},
   "LIGHT": {},
