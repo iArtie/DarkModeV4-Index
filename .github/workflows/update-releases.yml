@@ -1,0 +1,43 @@
+name: Update Download Counts JSON
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # cada 15 minutos
+  workflow_dispatch:
+
+jobs:
+  update-downloads:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Fetch releases from GitHub API
+        run: |
+          curl -H "Accept: application/vnd.github+json" \
+               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -o releases.json \
+               https://api.github.com/repos/iArtie/DarkModeV4-Index/releases
+
+      - name: Process releases into downloadscount.json
+        run: |
+          jq 'reduce .[] as $r ({}; 
+            ($r.tag_name | capture("^v(?<version>[0-9.]+)-(?<mode>\\w+)$")) as $m |
+            ($r.assets[] | select(.browser_download_url | endswith(".zip"))) as $asset |
+            .[$m.mode][$m.version] = {
+              "download link": $asset.browser_download_url,
+              "download count": $asset.download_count
+            }
+          )' releases.json > downloadscount.json || echo '{}' > downloadscount.json
+
+      - name: Commit and push if changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add downloadscount.json
+          git diff --quiet && echo "No changes to commit" || git commit -m "Update downloadscount.json"
+          git push
