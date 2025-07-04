@@ -2,7 +2,7 @@ name: Update Downloads Count JSON
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # cada 5 minutos
+    - cron: '*/5 * * * *'  # Cada 5 minutos
   workflow_dispatch:
 
 jobs:
@@ -25,41 +25,42 @@ jobs:
                https://api.github.com/repos/iArtie/DarkModeV4-Index/releases \
             > releases.json
 
-      - name: Generar downloadscount.json usando texturepacks.json
+      - name: Generar downloadscount.json desde texturepacks.json
         run: |
           if [ ! -f texturepacks.json ]; then
-            echo "No se encontró texturepacks.json"
-            exit 1
+            echo "{}" > texturepacks.json
           fi
 
           echo "{}" > downloadscount.json
 
-          for mode in $(jq -r 'keys[]' texturepacks.json); do
-            has_lastest=$(jq -r --arg m "$mode" '.[$m] | has("Lastest")' texturepacks.json)
-            if [[ "$has_lastest" == "true" ]]; then
-              version=$(jq -r --arg m "$mode" '.[$m]["Lastest"]["version"]' texturepacks.json)
-              link=$(jq -r --arg m "$mode" '.[$m]["Lastest"]["download"]' texturepacks.json)
+          mapfile -t modes < <(jq -r 'keys[]' texturepacks.json)
 
-              count=$(jq --arg url "$link" -r '
+          for mode in "${modes[@]}"; do
+            has_lastest=$(jq -r --arg mode "$mode" '.[$mode] | has("Lastest")' texturepacks.json)
+            if [[ "$has_lastest" == "true" ]]; then
+              version=$(jq -r --arg mode "$mode" '.[$mode].Lastest.version' texturepacks.json)
+              download_url=$(jq -r --arg mode "$mode" '.[$mode].Lastest.download' texturepacks.json)
+
+              count=$(jq --arg url "$download_url" -r '
                 .[] | .assets[]? | select(.browser_download_url == $url) | .download_count // 0
               ' releases.json)
 
-              if [[ "$count" != "" ]]; then
-                jq --arg mode "$mode" --arg version "$version" --arg link "$link" --argjson count "$count" \
-                  '. + {($mode): {($version): { "download link": $link, "download count": $count }}}' \
+              if [[ -n "$count" ]]; then
+                jq --arg mode "$mode" --arg version "$version" --arg url "$download_url" --argjson count "$count" \
+                  '. + {($mode): {($version): { "download link": $url, "download count": $count }}}' \
                   downloadscount.json > tmp.json && mv tmp.json downloadscount.json
               fi
             fi
           done
 
-      - name: Commit y push
+      - name: Commit y push si hubo cambios
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add downloadscount.json
 
           if ! git diff --cached --quiet; then
-            git commit -m "Actualizado downloadscount.json con datos desde texturepacks.json"
+            git commit -m "Update downloadscount.json from texturepacks.json"
             git push
           else
-            echo "No hay cambios para subir."
+            echo "No changes to commit"
