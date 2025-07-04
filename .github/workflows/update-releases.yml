@@ -2,62 +2,66 @@ name: Update Downloads Count JSON
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # cada 15 minutos
+    - cron: '*/5 * * * *'  # cada 5 minutos
   workflow_dispatch:
 
 jobs:
-  update-json:
+  update-downloads:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Fetch releases from GitHub API
-        id: fetch_releases
+      - name: Instalar jq
+        run: sudo apt-get install jq
+
+      - name: Descargar releases desde GitHub API
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/iArtie/DarkModeV4-Index/releases" > releases.json
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github+json" \
+               https://api.github.com/repos/iArtie/DarkModeV4-Index/releases \
+            > releases.json
 
-      - name: Generate downloadscount.json
-        id: generate_json
+      - name: Generar downloadscount.json usando texturepacks.json
         run: |
-          #!/usr/bin/env bash
-          # Vamos a usar jq para procesar el JSON
-          cat releases.json | jq 'reduce .[] as $release ({}; 
-            . + (
-              $release.assets 
-              | map(select(.name | endswith(".zip"))) 
-              | map(
-                  # Extraemos nombre, version, link y download_count
-                  {
-                    key: ($release.tag_name | capture("v(?<version>[^-]+)-(?<name>.+)") | .name),
-                    version: ($release.tag_name | capture("v(?<version>[^-]+)-(?<name>.+)") | .version),
-                    download_link: .browser_download_url,
-                    download_count: .download_count
-                  }
-                ) 
-              | map({ (.key): { (.version): { "download link": .download_link, "download count": .download_count } } })
-              | add
-            )
-          )' > downloadscount.json
+          # Crear json vacío
+          echo "{}" > downloadscount.json
 
-          echo "Contenido generado:"
+          # Recorrer cada modo del texturepacks.json
+          for mode in $(jq -r 'keys[]' texturepacks.json); do
+            # Validar si tiene "Lastest"
+            has_lastest=$(jq -r --arg m "$mode" '.[$m] | has("Lastest")' texturepacks.json)
+            if [[ "$has_lastest" == "true" ]]; then
+              version=$(jq -r --arg m "$mode" '.[$m]["Lastest"]["version"]' texturepacks.json)
+              link=$(jq -r --arg m "$mode" '.[$m]["Lastest"]["download"]' texturepacks.json)
+
+              # Buscar ese link en releases.json
+              count=$(jq --arg url "$link" -r '
+                .[] | .assets[]? | select(.browser_download_url == $url) | .download_count // 0
+              ' releases.json)
+
+              # Si encontró el count, lo guarda
+              if [[ "$count" != "" ]]; then
+                jq --arg mode "$mode" --arg version "$version" --arg link "$link" --argjson count "$count" \
+                  '. + {($mode): {($version): { "download link": $link, "download count": $count }}}' \
+                  downloadscount.json > temp.json && mv temp.json downloadscount.json
+              fi
+            fi
+          done
+
+          echo "Resultado final:"
           cat downloadscount.json
 
-      - name: Commit and push JSON if changed
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit y push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add downloadscount.json
           if ! git diff --cached --quiet; then
-            git commit -m "Update downloadscount.json with latest downloads"
+            git commit -m "Actualizado downloadscount.json con datos desde texturepacks.json"
             git push
           else
-            echo "No changes to commit"
-          fi
+            echo "No hay cambios para subir."
