@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Instalar jq
-        run: sudo apt-get install jq
+        run: sudo apt-get install -y jq
 
       - name: Descargar releases desde GitHub API
         env:
@@ -27,39 +27,37 @@ jobs:
 
       - name: Generar downloadscount.json usando texturepacks.json
         run: |
-          # Crear json vacío
+          if [ ! -f texturepacks.json ]; then
+            echo "No se encontró texturepacks.json"
+            exit 1
+          fi
+
           echo "{}" > downloadscount.json
 
-          # Recorrer cada modo del texturepacks.json
           for mode in $(jq -r 'keys[]' texturepacks.json); do
-            # Validar si tiene "Lastest"
             has_lastest=$(jq -r --arg m "$mode" '.[$m] | has("Lastest")' texturepacks.json)
             if [[ "$has_lastest" == "true" ]]; then
               version=$(jq -r --arg m "$mode" '.[$m]["Lastest"]["version"]' texturepacks.json)
               link=$(jq -r --arg m "$mode" '.[$m]["Lastest"]["download"]' texturepacks.json)
 
-              # Buscar ese link en releases.json
               count=$(jq --arg url "$link" -r '
                 .[] | .assets[]? | select(.browser_download_url == $url) | .download_count // 0
               ' releases.json)
 
-              # Si encontró el count, lo guarda
               if [[ "$count" != "" ]]; then
                 jq --arg mode "$mode" --arg version "$version" --arg link "$link" --argjson count "$count" \
                   '. + {($mode): {($version): { "download link": $link, "download count": $count }}}' \
-                  downloadscount.json > temp.json && mv temp.json downloadscount.json
+                  downloadscount.json > tmp.json && mv tmp.json downloadscount.json
               fi
             fi
           done
-
-          echo "Resultado final:"
-          cat downloadscount.json
 
       - name: Commit y push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add downloadscount.json
+
           if ! git diff --cached --quiet; then
             git commit -m "Actualizado downloadscount.json con datos desde texturepacks.json"
             git push
