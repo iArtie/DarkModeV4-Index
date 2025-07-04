@@ -1,43 +1,63 @@
-name: Update Download Counts JSON
+name: Update Downloads Count JSON
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # cada 15 minutos
+    - cron: '*/5 * * * *' # cada 15 minutos
   workflow_dispatch:
 
 jobs:
-  update-downloads:
+  update-json:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
       - name: Fetch releases from GitHub API
+        id: fetch_releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -H "Accept: application/vnd.github+json" \
-               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -o releases.json \
-               https://api.github.com/repos/iArtie/DarkModeV4-Index/releases
+          curl -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/iArtie/DarkModeV4-Index/releases" > releases.json
 
-      - name: Process releases into downloadscount.json
+      - name: Generate downloadscount.json
+        id: generate_json
         run: |
-          jq 'reduce .[] as $r ({}; 
-            ($r.tag_name | capture("^v(?<version>[0-9.]+)-(?<mode>\\w+)$")) as $m |
-            ($r.assets[] | select(.browser_download_url | endswith(".zip"))) as $asset |
-            .[$m.mode][$m.version] = {
-              "download link": $asset.browser_download_url,
-              "download count": $asset.download_count
-            }
-          )' releases.json > downloadscount.json || echo '{}' > downloadscount.json
+          #!/usr/bin/env bash
+          # Vamos a usar jq para procesar el JSON
+          cat releases.json | jq 'reduce .[] as $release ({}; 
+            . + (
+              $release.assets 
+              | map(select(.name | endswith(".zip"))) 
+              | map(
+                  # Extraemos nombre, version, link y download_count
+                  {
+                    key: ($release.tag_name | capture("v(?<version>[^-]+)-(?<name>.+)") | .name),
+                    version: ($release.tag_name | capture("v(?<version>[^-]+)-(?<name>.+)") | .version),
+                    download_link: .browser_download_url,
+                    download_count: .download_count
+                  }
+                ) 
+              | map({ (.key): { (.version): { "download link": .download_link, "download count": .download_count } } })
+              | add
+            )
+          )' > downloadscount.json
 
-      - name: Commit and push if changes
+          echo "Contenido generado:"
+          cat downloadscount.json
+
+      - name: Commit and push JSON if changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add downloadscount.json
-          git diff --quiet && echo "No changes to commit" || git commit -m "Update downloadscount.json"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "Update downloadscount.json with latest downloads"
+            git push
+          else
+            echo "No changes to commit"
+          fi
