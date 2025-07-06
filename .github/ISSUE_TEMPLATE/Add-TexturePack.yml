@@ -20,6 +20,7 @@ body:
         - SHADOW
         - SOUL
         - STAR
+        - BONUS
     validations:
       required: true
   - type: input
