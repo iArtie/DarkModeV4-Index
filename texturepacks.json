@@ -1,8 +1,8 @@
 {
   "METAL": {
     "Lastest": {
-      "version": "1.0.3",
-      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.3-METAL/METAL1.zip"
+      "version": "1.0.4",
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.4-METAL/METAL.zip"
     },
     "1.0.0": {
       "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.0-METAL/METAL.zip"
@@ -12,6 +12,9 @@
     },
     "1.0.3": {
       "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.3-METAL/METAL1.zip"
+    },
+    "1.0.4": {
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.4-METAL/METAL.zip"
     }
   },
   "BLOOD": {},
