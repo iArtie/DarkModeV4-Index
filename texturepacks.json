@@ -36,7 +36,15 @@
   "LIGHT": {},
   "MOON": {},
   "POISON": {},
-  "SHADOW": {},
+  "SHADOW": {
+    "Lastest": {
+      "version": "1.0.4",
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.4-SHADOW/SHADOW.zip"
+    },
+    "1.0.4": {
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.4-SHADOW/SHADOW.zip"
+    }
+  },
   "SOUL": {},
   "STAR": {},
   "BONUS": {}
