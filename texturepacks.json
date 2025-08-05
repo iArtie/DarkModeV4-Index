@@ -16,11 +16,14 @@
   "FIRE": {},
   "ICE": {
     "Lastest": {
-      "version": "1.0.4",
-      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.4-ICE/ICE.zip"
+      "version": "1.0.5",
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.5-ICE/ICE.zip"
     },
     "1.0.4": {
       "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.4-ICE/ICE.zip"
+    },
+    "1.0.5": {
+      "download": "https://github.com/iArtie/DarkModeV4-Index/releases/download/v1.0.5-ICE/ICE.zip"
     }
   },
   "LAVA": {},
